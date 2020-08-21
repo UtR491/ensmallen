@@ -284,7 +284,7 @@ inline bool MOEAD::Dominates(const arma::vec& first,
     {
       return false;
     }
-    if( first(i) > second(i) )
+    if( first(i) >= second(i) )
       flag = 1;
   }
   if ( i == numObjectives && flag == 1 )
