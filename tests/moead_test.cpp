@@ -76,8 +76,6 @@ TEST_CASE("MOEADFonsecaFlemingTest", "[MOEADTest]")
 TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
 {
   bool success=false;
-  for(size_t trial = 0; trial < 3; trial++)
-  {
     SchafferFunctionN1<arma::mat> SCH;
     arma::vec lowerBound = {-1000};
     arma::vec upperBound = {1000};
@@ -109,8 +107,7 @@ TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
     if(allInRange==true)
     {
       success=true;
-      break;
     }
-  }
+
   REQUIRE(success);
 }
