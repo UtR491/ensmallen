@@ -99,6 +99,7 @@ TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
     for (arma::mat solution: bestFronts)
     {
       double val = arma::as_scalar(solution);
+      cout<<val<<"\n";
       if (val < 0.0 || val > 2.0)
       {
         allInRange = false;
