@@ -106,7 +106,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
 
   // 1.4 Initialize the ideal point z.
   arma::vec idealPoint(numObjectives);
-  idealPoint.fill(-std::numeric_limits<ElemType>::max());
+  idealPoint.fill(std::numeric_limits<ElemType>::max());
 
   terminate |= Callback::BeginOptimization(*this, objectives, iterate, callbacks...);
   // 2 The main loop.
@@ -165,7 +165,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
     // 2.3 Update of ideal point.
     for (size_t idx = 0;idx < numObjectives;idx++)
     {
-      idealPoint(idx) = std::max(idealPoint(idx),
+      idealPoint(idx) = std::min(idealPoint(idx),
           evaluatedCandidate[0][idx]);
     }
 
