@@ -136,12 +136,12 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
         k += 1;
     }
     std::vector<MatType> candidate(1);
-    if(crossoverDeterminer(generator) < crossoverProb)
+    if(arma::randu() < crossoverProb)
     {
       candidate[0].resize(iterate.n_rows, iterate.n_cols);
       for (size_t idx = 0;idx < iterate.n_rows; idx++)
       {
-        if (crossoverDeterminer(generator) < 0.5)
+        if (arma::randu() < 0.5)
           candidate[0][idx] = population[k][idx];
         else
           candidate[0][idx] = population[l][idx];
