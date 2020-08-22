@@ -199,13 +199,13 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       //! Check if any of the remaining members of external population dominate
       //! candidate.
       bool flag = 0;
-      std::vector<MatType> wrapperFirst(1);
+      std::vector<MatType> wrapperFirst(1); cout<<"202\n";
       for (size_t idx = 0; idx < externalPopulation.size(); idx++)
       {
-        wrapperFirst[0]=externalPopulation[idx];
+        wrapperFirst[0]=externalPopulation[idx]; cout<<"203\n";
         first[0].clear();
         first[0].resize(numObjectives);
-        EvaluateObjectives(wrapperFirst, objectives, first);
+        EvaluateObjectives(wrapperFirst, objectives, first); cout<<"208\n";
         if (Dominates(first[0], evaluatedCandidate[0]))
         {
           flag = 1;
