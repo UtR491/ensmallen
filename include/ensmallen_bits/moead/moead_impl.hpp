@@ -127,8 +127,8 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
 
     // 2.1 Randomly select two indices in weightNeighbourIndices(i) and use them
     // to make a child.
-    size_t k = arma::randu()*(populationSize-1),
-           l = arma::randu()*(populationSize-1);
+    size_t k = weightNeighbourIndices(arma::randu()*(neighbourhoodSize)),
+           l = weightNeighbourIndices(arma::randu()*(neighbourhoodSize));
     std::vector<MatType> candidate(1);
     if(arma::randu() < crossoverProb)
     {
