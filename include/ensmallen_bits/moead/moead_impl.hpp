@@ -115,16 +115,6 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
   {
     terminate |= Callback::StepTaken(*this, objectives, iterate, callbacks...);
 
-    // To generate random numbers.
-    std::default_random_engine generator;
-
-    // Distribution to choose two random parents for mutation.
-    std::uniform_int_distribution<size_t> distribution(0, populationSize-1);
-
-    // Distribution to choose a number between 0 and 1 to determine whether
-    // mutation or crossover will happen or not.
-    std::uniform_real_distribution<double> crossoverDeterminer(0, 1);
-
     // 2.1 Randomly select two indices in weightNeighbourIndices(i) and use them
     // to make a child.
     size_t k = weightNeighbourIndices(arma::randu()*(neighbourhoodSize)),
