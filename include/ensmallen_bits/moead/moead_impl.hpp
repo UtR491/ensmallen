@@ -127,15 +127,15 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
 
     // 2.1 Randomly select two indices in weightNeighbourIndices(i) and use them
     // to make a child.
-    size_t k = weightNeighbourIndices(i, distribution(generator)),
-           l = weightNeighbourIndices(i, distribution(generator));
+    size_t k = arma::randu()*(populationSize-1),
+           l = arma::randu()*(populationSize-1);
     std::vector<MatType> candidate(1);
-    if(crossoverDeterminer(generator) < crossoverProb)
+    if(arma::randu() < crossoverProb)
     {
       candidate[0].resize(iterate.n_rows, iterate.n_cols);
       for (size_t idx = 0;idx < iterate.n_rows; idx++)
       {
-        if (crossoverDeterminer(generator) < 0.5)
+        if (arma::randu() < 0.5)
           candidate[0][idx] = population[k][idx];
         else
           candidate[0][idx] = population[l][idx];
@@ -199,13 +199,13 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       //! Check if any of the remaining members of external population dominate
       //! candidate.
       bool flag = 0;
-      std::vector<MatType> wrapperFirst(1); cout<<"202\n";
+      std::vector<MatType> wrapperFirst(1);
       for (size_t idx = 0; idx < externalPopulation.size(); idx++)
       {
-        wrapperFirst[0]=externalPopulation[idx]; cout<<"203\n";
+        wrapperFirst[0]=externalPopulation[idx];
         first[0].clear();
         first[0].resize(numObjectives);
-        EvaluateObjectives(wrapperFirst, objectives, first); cout<<"208\n";
+        EvaluateObjectives(wrapperFirst, objectives, first);
         if (Dominates(first[0], evaluatedCandidate[0]))
         {
           flag = 1;
