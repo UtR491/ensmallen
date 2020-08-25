@@ -53,6 +53,7 @@ class MOEAD {
    * parameters according to the problem.
    *
    * @param populationSize The number of elements in the population.
+   * @param numGeneration The number of generations the algorithm runs.
    * @param crossoverProb The probability that a crossover will occur.
    * @param mutationProb The probability that a mutation will occur.
    * @param mutationStrength The strength of mutation.
@@ -64,6 +65,7 @@ class MOEAD {
    *    of the variable space.
    */
   MOEAD(const size_t populationSize = 100,
+        const size_t numGeneration = 100,
         const double crossoverProb = 0.6,
         const double mutationProb = 0.3,
         const double mutationStrength = 1e-3,
@@ -92,6 +94,11 @@ class MOEAD {
   size_t PopulationSize() const { return populationSize; }
   //! Modify the population size.
   size_t& PopulationSize() { return populationSize; }
+
+  //! Get the number of generations.
+  size_t NumGeneration() const { return numGeneration; }
+  //! Modify the number of generations.
+  size_t& NumGeneration() { return numGeneration; }
 
   //! Get the crossover rate.
   double CrossoverRate() const { return crossoverProb; }
@@ -203,6 +210,9 @@ class MOEAD {
 
   //! Size of the population.
   size_t populationSize;
+
+  //! Number of generations.
+  size_t numGeneration;
 
   //! Probability of crossover between two members.
   double crossoverProb;
