@@ -112,8 +112,11 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
   EvaluateObjectives(population, objectives, FValue);
 
   // 1.4 Initialize the ideal point z.
-  arma::vec idealPoint(numObjectives);
-  idealPoint.fill(std::numeric_limits<ElemType>::max());
+  std::vector<arma::vec> idealPoint(1);
+  idealPoint[0].resize(numObjectives);
+  std::vector<MatType> iterateWrapper(0);
+  EvaluateObjectives(iterateWrapper, objectives, idealPoint);
+
 
   terminate |= Callback::BeginOptimization(*this, objectives, iterate, callbacks...);
 
@@ -159,7 +162,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       // 2.3 Update of ideal point.
       for (size_t idx = 0;idx < numObjectives;idx++)
       {
-        idealPoint(idx) = std::min(idealPoint(idx),
+        idealPoint[0](idx) = std::min(idealPoint[0](idx),
             evaluatedCandidate[0][idx]);
       }
 
@@ -167,10 +170,10 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       for (size_t idx = 0;idx < neighbourhoodSize;idx++)
       {
         if (DecomposedSingleObjective(weights[weightNeighbourIndices(i, idx)],
-              idealPoint, evaluatedCandidate[0])
+              idealPoint[0], evaluatedCandidate[0])
             <= DecomposedSingleObjective(
               weights[weightNeighbourIndices(i,idx)],
-              idealPoint, FValue[weightNeighbourIndices(i, idx)]))
+              idealPoint[0], FValue[weightNeighbourIndices(i, idx)]))
         {
           population.at(weightNeighbourIndices(i, idx)) = candidate[0];
           FValue[weightNeighbourIndices(i, idx)] = evaluatedCandidate[0];
