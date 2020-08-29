@@ -24,6 +24,7 @@ inline MOEAD::MOEAD(const size_t populationSize,
                     const double mutationProb,
                     const double mutationStrength,
                     const size_t neighbourhoodSize,
+                    const double distributionIndex,
                     const arma::vec& lowerBound,
                     const arma::vec& upperBound) :
     populationSize(populationSize),
@@ -32,6 +33,7 @@ inline MOEAD::MOEAD(const size_t populationSize,
     mutationProb(mutationProb),
     mutationStrength(mutationStrength),
     neighbourhoodSize(neighbourhoodSize),
+    distributionIndex(distributionIndex),
     lowerBound(lowerBound),
     upperBound(upperBound),
     numObjectives(0)
@@ -152,7 +154,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
         candidate[0] = population[i];
 
       // 2.2 Improve the child.
-      Mutate(candidate[0], lowerBound, upperBound);
+      Mutate(candidate[0], 1/ numObjectives,lowerBound, upperBound);
 
       // Store solution for candidate.
       std::vector<arma::vec> evaluatedCandidate(1);
@@ -246,19 +248,42 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
 //! Perform mutation of the candidate.
   template<typename MatType>
 inline void MOEAD::Mutate(MatType& child,
+    const double& rate,
     const arma::vec& lowerBound,
     const arma::vec& upperBound)
 {
-  child += (arma::randu<MatType>(child.n_rows, child.n_cols) < mutationProb) %
-    (mutationStrength * arma::randn<MatType>(child.n_rows, child.n_cols));
+  size_t numVariables = lowerBound.n_elem;
+  double rnd, delta1, delta2, mutationPower, deltaq;
+  double y, yl, yu, val, xy;
 
-  // Constraint all genes to be between bounds.
-  for (size_t idx = 0; idx < child.n_rows; idx++)
+  for(size_t j=0; j < numVariables; j++)
   {
-    if (child[idx] < lowerBound(idx))
-      child[idx] = lowerBound(idx);
-    else if (child[idx] > upperBound(idx))
-      child[idx] = upperBound(idx);
+    if(arma::randu() <= rate)
+    {
+      y = child[j];
+      yl = lowerBound(j);
+      yu = upperBound(j);
+      delta1 = (y-yl)/(yu-yl);
+      delta2 = (yu-y)/(yu-yl);    
+      rnd=arma::randu();
+      mutationPower=1/distributionIndex;
+      if (rnd <= 0.5)
+      {
+        xy = 1.0-delta1;
+        val = 2.0*rnd+(1.0-2.0*rnd)*(std::pow(xy,(distributionIndex+1.0)));
+        deltaq =  std::pow(val,mutationPower) - 1.0;
+      }
+      else
+      {
+        xy = 1.0-delta2;
+        val = 2.0*(1.0-rnd)+2.0*(rnd-0.5)*(pow(xy,(distributionIndex+1.0)));
+        deltaq = 1.0 - (pow(val,mutationPower));
+      }
+      y = y + deltaq*(yu-yl);
+      if (y<yl) y = yl;
+      if (y>yu) y = yu;
+      child[j] = y;
+    }
   }
 }
 
