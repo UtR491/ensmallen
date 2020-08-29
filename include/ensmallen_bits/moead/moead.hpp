@@ -70,6 +70,7 @@ class MOEAD {
         const double mutationProb = 0.3,
         const double mutationStrength = 1e-3,
         const size_t neighbourhoodSize = 50,
+        const double distributionIndex = 0.5,
         const arma::vec& lowerBound = arma::ones(1, 1),
         const arma::vec& upperBound = arma::ones(1, 1));
   /**
@@ -141,6 +142,7 @@ class MOEAD {
    */
   template<typename MatType>
   void Mutate(MatType& child,
+              const double& rate,
               const arma::vec& lowerBound,
               const arma::vec& upperBound);
 
@@ -225,6 +227,9 @@ class MOEAD {
 
   //! Number of nearest neighbours of weights to consider.
   size_t neighbourhoodSize;
+
+  //! Distribution index for the polynomial distribution.
+  double distributionIndex;
 
   //! Lower bound on each variable in the variable space.
   arma::vec lowerBound;
