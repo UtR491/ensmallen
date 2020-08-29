@@ -111,6 +111,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
   std::vector<arma::vec> FValue(populationSize);
   for (size_t i = 0; i < populationSize; i++)
     FValue[i].resize(numObjectives);
+
   EvaluateObjectives(population, objectives, FValue);
 
   // 1.4 Initialize the ideal point z.
