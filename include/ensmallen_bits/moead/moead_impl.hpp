@@ -130,18 +130,21 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
     for (size_t i : shuffle)
     {
       terminate |= Callback::StepTaken(*this, objectives, iterate, callbacks...);
+      std::default_random_engine generator;
+      std::uniform_int_distribution<int> distribution(0,neighbourhoodSize-1);
+      std::uniform_real_distribution<double> determiner(0, 1.0);
 
       // 2.1 Randomly select two indices in weightNeighbourIndices(i) and use them
       // to make a child.
-      size_t k = weightNeighbourIndices(i, arma::randi(arma::distr_param(0,  neighbourhoodSize-1))),
-             l = weightNeighbourIndices(i, arma::randi(arma::distr_param(0,  neighbourhoodSize-1)));
+      size_t k = weightNeighbourIndices(i, distribution(generator)),
+             l = weightNeighbourIndices(i, distribution(generator));
       std::vector<MatType> candidate(1);
-      if(arma::randu() < crossoverProb)
+      if(determiner(generator) < crossoverProb)
       {
         candidate[0].resize(iterate.n_rows, iterate.n_cols);
         for (size_t idx = 0;idx < iterate.n_rows; idx++)
         {
-          if (arma::randu() < 0.5)
+          if (determiner(generator) < 0.5)
             candidate[0][idx] = population[k][idx];
           else
             candidate[0][idx] = population[l][idx];
@@ -389,3 +392,4 @@ MOEAD::EvaluateObjectives(
 }
 
 #endif
+
