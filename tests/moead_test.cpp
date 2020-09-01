@@ -31,3 +31,41 @@ bool InBounds(const double& value, const double& low, const double& high)
 {
   return !(value < low) && !(high < value);
 }
+
+/**
+ * Optimize for the Fonseca Fleming function using MOEA/D optimizer.
+ */
+TEST_CASE("MOEADFonsecaFlemingTest", "[MOEADTest]")
+{
+  FonsecaFlemingFunction<arma::mat> FON;
+  const arma::vec lowerBound("-4 -4 -4");
+  const arma::vec upperBound("4 4 4");
+  const double strength = 1e-3;
+  const double expectedLowerBound = -1.0 / sqrt(3);
+  const double expectedUpperBound = 1.0 / sqrt(3);
+  MOEAD opt(25, 10, 0.6, 0.7, strength, 10, 0.5, 0.5, lowerBound, upperBound);
+
+  typedef decltype(FON.objectiveA) ObjectiveTypeA;
+  typedef decltype(FON.objectiveB) ObjectiveTypeB;
+  arma::mat coords = FON.GetInitialPoint();
+  std::tuple<ObjectiveTypeA, ObjectiveTypeB> objectives = FON.GetObjectives();
+  opt.Optimize(objectives, coords);
+  std::vector<arma::mat> bestFront = opt.Front();
+  bool allInRange = true;
+  for (size_t i = 0; i < bestFront.size(); i++)
+  {
+    const arma::mat solution = bestFront[i];
+    double valX = arma::as_scalar(solution(0));
+    double valY = arma::as_scalar(solution(1));
+    double valZ = arma::as_scalar(solution(2));
+
+    if (!InBounds(valX, expectedLowerBound, expectedUpperBound) ||
+        !InBounds(valY, expectedLowerBound, expectedUpperBound) ||
+        !InBounds(valZ, expectedLowerBound, expectedUpperBound))
+    {
+      allInRange = false;
+      break;
+    }
+  }
+  REQUIRE(allInRange);
+}
