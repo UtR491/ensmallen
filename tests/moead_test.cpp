@@ -92,12 +92,13 @@ TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
     std::vector<arma::mat> bestFronts = opt.Front();
 
     bool allInRange = true;
+    double minimumPositive = 1000;
 
     for (arma::mat solution: bestFronts)
     {
       double val = arma::as_scalar(solution);
-      std::cout<<val<<"\n";
-      if (val < -0.01 || val > 2.0)
+      minimumPositive = std::min(minimumPositive, val>=0?val:1000);
+      if ((val < 0.00 && std::abs(val) >= minimumPositive) || val > 2.0)
       {
         allInRange = false;
         break;
