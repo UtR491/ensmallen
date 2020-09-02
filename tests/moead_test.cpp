@@ -70,3 +70,38 @@ TEST_CASE("MOEADFonsecaFlemingTest", "[MOEADTest]")
   }
   REQUIRE(allInRange);
 }
+/**
+ * Optimize for the function using MOEA/D optimizer.
+ */
+TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
+{
+    SchafferFunctionN1<arma::mat> SCH;
+    arma::vec lowerBound = {-1000};
+    arma::vec upperBound = {1000};
+
+    MOEAD opt(10, 10, 0.6, 0.7, 1e-3, 9, 0.5, lowerBound, upperBound);
+
+    typedef decltype(SCH.objectiveA) ObjectiveTypeA;
+    typedef decltype(SCH.objectiveB) ObjectiveTypeB;
+
+    arma::mat coords = SCH.GetInitialPoint();
+    std::tuple<ObjectiveTypeA, ObjectiveTypeB> objectives =
+        SCH.GetObjectives();
+
+    opt.Optimize(objectives, coords);
+    std::vector<arma::mat> bestFronts = opt.Front();
+
+    bool allInRange = true;
+
+    for (arma::mat solution: bestFronts)
+    {
+      double val = arma::as_scalar(solution);
+      std::cout<<val<<"\n";
+      if (val < -0.01 || val > 2.0)
+      {
+        allInRange = false;
+        break;
+      }
+    }
+  REQUIRE(allInRange);
+}
