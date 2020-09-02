@@ -79,7 +79,7 @@ TEST_CASE("MOEADSchafferN1Test", "[MOEADTest]")
     arma::vec lowerBound = {-1000};
     arma::vec upperBound = {1000};
 
-    MOEAD opt(10, 10, 0.6, 0.7, 1e-3, 9, 0.5, lowerBound, upperBound);
+    MOEAD opt(150, 10, 0.6, 0.7, 1e-3, 9, 0.5, lowerBound, upperBound);
 
     typedef decltype(SCH.objectiveA) ObjectiveTypeA;
     typedef decltype(SCH.objectiveB) ObjectiveTypeB;
