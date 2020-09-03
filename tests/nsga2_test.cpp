@@ -57,9 +57,9 @@ TEST_CASE("NSGA2SchafferN1Test", "[NSGA2Test]")
   {
     double val = arma::as_scalar(solution);
     if(val >= 0.0)
-      minimumPositve = std::min(minimumPositive, val);
+      minimumPositive = std::min(minimumPositive, val);
 
-    if ((val < 0.0 && std::abs(val) >= minimumPositve) || val > 2.0)
+    if ((val < 0.0 && std::abs(val) >= minimumPositive) || val > 2.0)
     {
       allInRange = false;
       break;
