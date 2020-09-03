@@ -51,12 +51,15 @@ TEST_CASE("NSGA2SchafferN1Test", "[NSGA2Test]")
   std::vector<arma::mat> bestFront = opt.Front();
 
   bool allInRange = true;
+  double minimumPositive = 1000;
 
   for (arma::mat solution: bestFront)
   {
     double val = arma::as_scalar(solution);
+    if(val >= 0.0)
+      minimumPositve = std::min(minimumPositive, val);
 
-    if (val < 0.0 || val > 2.0)
+    if ((val < 0.0 && std::abs(val) >= minimumPositve) || val > 2.0)
     {
       allInRange = false;
       break;
