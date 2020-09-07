@@ -39,6 +39,27 @@ inline MOEAD::MOEAD(const size_t populationSize,
     numObjectives(0)
   { /* Nothing to do here. */ }
 
+inline MOEAD::MOEAD(const size_t populationSize,
+                    const size_t numGeneration,
+                    const double crossoverProb,
+                    const double mutationProb,
+                    const double mutationStrength,
+                    const size_t neighbourhoodSize,
+                    const double distributionIndex,
+                    const double lowerBound,
+                    const double upperBound) :
+    populationSize(populationSize),
+    numGeneration(numGeneration),
+    crossoverProb(crossoverProb),
+    mutationProb(mutationProb),
+    mutationStrength(mutationStrength),
+    neighbourhoodSize(neighbourhoodSize),
+    distributionIndex(distributionIndex),
+    lowerBound(lowerBound * arma::ones(1, 1)),
+    upperBound(upperBound * arma::ones(1, 1)),
+    numObjectives(0)
+  { /* Nothing to do here. */ }
+
 //! Optimize the function.
 template<typename MatType,
          typename... ArbitraryFunctionType,
@@ -47,6 +68,13 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
                                             MatType& iterate,
                                             CallbackTypes&&... callbacks)
 {
+  // Check if lower bound is a vector of a single dimension.
+  if (lowerBound.n_rows == 1)
+    lowerBound = lowerBound(0, 0) * arma::ones(iterate.n_rows, iterate.n_cols);
+
+  // Check if lower bound is a vector of a single dimension.
+  if (upperBound.n_rows == 1)
+    upperBound = upperBound(0, 0) * arma::ones(iterate.n_rows, iterate.n_cols);
   // Convenience typedefs.
   typedef typename MatType::elem_type ElemType;
 
@@ -72,12 +100,9 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
   std::vector<size_t> shuffle(populationSize);
 
   // Weight vectors, where each one of them represents a decomposition.
-  std::vector<arma::vec> weights(populationSize);
+  arma::Mat<ElemType> weights(numObjectives, populationSize, arma::fill::randu);
   for (size_t i = 0; i < populationSize; i++)
-  {
-    weights[i] = arma::vec(numObjectives, arma::fill::randu);
     shuffle[i] = i;
-  }
 
   // 1.2 Storing the indices of nearest neighbours of each weight vector.
   arma::Mat<size_t> weightNeighbourIndices(populationSize, neighbourhoodSize);
@@ -86,14 +111,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
     // To temporarily store the distance between weights(i) and each other weights.
     arma::vec distances(populationSize);
     for (size_t j = 0; j < populationSize; j++)
-    {
-      distances(j) = 0;
-      for (size_t w = 0; w < numObjectives ; w++)
-      {
-        distances(j) += std::pow(weights[i](w) - weights[j](w), 2);
-      }
-      distances(j) = std::sqrt(distances(j));
-    }
+      distances(j) = std::sqrt(arma::accu(arma::pow(weights.col(i)-weights.each_col(), 2)));
     arma::uvec sortedIndices = arma::stable_sort_index(distances, "descend");
     for (size_t iter = 1; iter <= neighbourhoodSize; iter++)
       weightNeighbourIndices(i, iter - 1) = sortedIndices(iter);
@@ -136,6 +154,13 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       // to make a child.
       size_t k = weightNeighbourIndices(i, arma::randi(arma::distr_param(0,  neighbourhoodSize-1))),
              l = weightNeighbourIndices(i, arma::randi(arma::distr_param(0,  neighbourhoodSize-1)));
+      if(k == l)
+      {
+        if(k == neighbourhoodSize-1)
+          k--;
+        else
+          k++;
+      }
       std::vector<MatType> candidate(1);
       double determiner1 = arma::randu();
       if(determiner1 < crossoverProb)
@@ -158,7 +183,7 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
         candidate[0] = population[i];
 
       // 2.2 Improve the child.
-      Mutate(candidate[0], 1/ numObjectives,lowerBound, upperBound);
+      Mutate(candidate[0], 1 / numObjectives, lowerBound, upperBound);
 
       // Store solution for candidate.
       std::vector<arma::vec> evaluatedCandidate(1);
@@ -175,10 +200,10 @@ typename MatType::elem_type MOEAD::Optimize(std::tuple<ArbitraryFunctionType...>
       // 2.4 Update of the neighbouring solutions.
       for (size_t idx = 0;idx < neighbourhoodSize;idx++)
       {
-        if (DecomposedSingleObjective(weights[weightNeighbourIndices(i, idx)],
+        if (DecomposedSingleObjective(weights.col(weightNeighbourIndices(i, idx)),
               idealPoint[0], evaluatedCandidate[0])
             <= DecomposedSingleObjective(
-              weights[weightNeighbourIndices(i,idx)],
+              weights.col(weightNeighbourIndices(i,idx)),
               idealPoint[0], FValue[weightNeighbourIndices(i, idx)]))
         {
           population.at(weightNeighbourIndices(i, idx)) = candidate[0];
